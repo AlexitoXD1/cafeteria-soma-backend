@@ -1,9 +1,13 @@
 package com.cafeteriasoma.app.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -47,7 +51,7 @@ import lombok.ToString;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = "contrasena")
 @EqualsAndHashCode(of = "idUsuario")
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +63,9 @@ public class Usuario {
 
     @Column(name = "correo", nullable = false, length = 120)
     private String correo; // se normaliza a minúsculas en @PrePersist/@PreUpdate
+
+    @Column(name = "telefono", nullable=false, length = 20)
+    private String telefono;
 
     @JsonIgnore
     @Column(name = "contrasena", nullable = false, length = 255)
@@ -90,4 +97,30 @@ public class Usuario {
     private void normalize() {
         if (correo != null) correo = correo.trim().toLowerCase();
     }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(() -> rol.getNombre());
+    }
+
+    @Override
+    public String getPassword() {
+        return contrasena;
+    }
+
+    @Override
+    public String getUsername() {
+        return correo;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
 }
