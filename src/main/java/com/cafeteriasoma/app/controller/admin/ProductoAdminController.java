@@ -26,13 +26,11 @@ public class ProductoAdminController {
 
     private final ProductoService productoService;
 
-    // Crear producto
     @PostMapping
     public ResponseEntity<ProductoResponse> crear(@Valid @RequestBody ProductoRequest request) {
-        return ResponseEntity.ok(productoService.crearProducto(request));
+        return ResponseEntity.status(201).body(productoService.crearProducto(request));
     }
 
-    // Actualizar producto
     @PutMapping("/{id}")
     public ResponseEntity<ProductoResponse> actualizar(
             @PathVariable Long id,
@@ -41,7 +39,6 @@ public class ProductoAdminController {
         return ResponseEntity.ok(productoService.actualizarProducto(id, request));
     }
 
-    // Cambiar estado (activar/desactivar)
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Void> cambiarEstado(
             @PathVariable Long id,

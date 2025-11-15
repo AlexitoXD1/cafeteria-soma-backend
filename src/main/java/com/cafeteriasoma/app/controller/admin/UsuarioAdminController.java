@@ -30,7 +30,7 @@ public class UsuarioAdminController {
 
     @PostMapping
     public ResponseEntity<UsuarioResponse> crear(@RequestBody UsuarioRequest request) {
-        return ResponseEntity.ok(usuarioService.crearUsuario(request));
+        return ResponseEntity.status(201).body(usuarioService.crearUsuario(request));
     }
 
     @GetMapping
@@ -44,7 +44,8 @@ public class UsuarioAdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> actualizar(@PathVariable Long id, @RequestBody UsuarioRequest request) {
+    public ResponseEntity<UsuarioResponse> actualizar(@PathVariable Long id,
+                                                     @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.actualizarUsuario(id, request));
     }
 
@@ -54,3 +55,4 @@ public class UsuarioAdminController {
         return ResponseEntity.noContent().build();
     }
 }
+

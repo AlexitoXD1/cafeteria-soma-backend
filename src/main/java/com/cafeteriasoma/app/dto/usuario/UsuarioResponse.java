@@ -13,7 +13,9 @@ public class UsuarioResponse {
     private String nombre;
     private String correo;
     private String telefono;
+    private Long idRol;
     private String rol;
     private Boolean activo;
     private LocalDateTime fechaCreacion;
 }
+

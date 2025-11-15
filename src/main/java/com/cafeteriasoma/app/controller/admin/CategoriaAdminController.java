@@ -2,6 +2,7 @@ package com.cafeteriasoma.app.controller.admin;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import com.cafeteriasoma.app.dto.categoria.CategoriaRequest;
 import com.cafeteriasoma.app.dto.categoria.CategoriaResponse;
 import com.cafeteriasoma.app.service.interfaces.CategoriaService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,8 +31,9 @@ public class CategoriaAdminController {
     private final CategoriaService categoriaService;
 
     @PostMapping
-    public ResponseEntity<CategoriaResponse> crear(@RequestBody CategoriaRequest request) {
-        return ResponseEntity.ok(categoriaService.crearCategoria(request));
+    public ResponseEntity<CategoriaResponse> crear(@Valid @RequestBody CategoriaRequest request) {
+        CategoriaResponse response = categoriaService.crearCategoria(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -38,8 +41,16 @@ public class CategoriaAdminController {
         return ResponseEntity.ok(categoriaService.listarCategorias(false));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoriaResponse> obtener(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.obtenerPorId(id));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponse> actualizar(@PathVariable Long id, @RequestBody CategoriaRequest request) {
+    public ResponseEntity<CategoriaResponse> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoriaRequest request
+    ) {
         return ResponseEntity.ok(categoriaService.actualizarCategoria(id, request));
     }
 

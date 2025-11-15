@@ -10,9 +10,11 @@ public class UsuarioMapper {
                 .nombre(usuario.getNombre())
                 .correo(usuario.getCorreo())
                 .telefono(usuario.getTelefono())
+                .idRol(usuario.getRol().getIdRol())
                 .rol(usuario.getRol().getNombre())
                 .activo(usuario.getActivo())
                 .fechaCreacion(usuario.getFechaCreacion())
                 .build();
     }
 }
+

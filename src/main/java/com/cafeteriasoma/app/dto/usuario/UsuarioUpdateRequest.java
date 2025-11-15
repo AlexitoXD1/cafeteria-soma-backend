@@ -7,5 +7,5 @@ import lombok.Setter;
 public class UsuarioUpdateRequest {
     private String nombre;
     private String telefono;
-    private String contrasenaNueva;
 }
+

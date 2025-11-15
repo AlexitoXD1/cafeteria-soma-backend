@@ -1,8 +1,6 @@
 package com.cafeteriasoma.app.service.impl;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +10,9 @@ import com.cafeteriasoma.app.dto.producto.ProductoRequest;
 import com.cafeteriasoma.app.dto.producto.ProductoResponse;
 import com.cafeteriasoma.app.entity.Categoria;
 import com.cafeteriasoma.app.entity.Producto;
+import com.cafeteriasoma.app.exception.BadRequestException;
+import com.cafeteriasoma.app.exception.ConflictException;
+import com.cafeteriasoma.app.exception.ResourceNotFoundException;
 import com.cafeteriasoma.app.repository.CategoriaRepository;
 import com.cafeteriasoma.app.repository.ProductoRepository;
 import com.cafeteriasoma.app.service.interfaces.ProductoService;
@@ -26,85 +27,101 @@ public class ProductoServiceImpl implements ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
 
-    // MÉTODOS ADMIN
-
     @Override
     public ProductoResponse crearProducto(ProductoRequest request) {
-        Categoria categoria = categoriaRepository.findById(request.getIdCategoria())
-                .orElseThrow(() -> new IllegalArgumentException("La categoría especificada no existe."));
 
-        if (!categoria.getActivo()) {
-            throw new RuntimeException("No se puede asignar un producto a una categoría inactiva");
+        if (productoRepository.existsByNombreIgnoreCase(request.getNombre())) {
+            throw new ConflictException("Ya existe un producto con el nombre: " + request.getNombre());
         }
 
-        Producto producto = Producto.builder()
-                .nombre(request.getNombre())
-                .descripcion(request.getDescripcion())
-                .precio(request.getPrecio())
-                .stock(request.getStock())
-                .imagenUrl(request.getImagenUrl())
-                .categoria(categoria)
-                .activo(true)
-                .build();
+        Categoria categoria = categoriaRepository.findById(request.getIdCategoria())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("La categoría especificada no existe.")
+                );
+
+        if (!categoria.getActivo()) {
+            throw new BadRequestException("No se puede crear un producto en una categoría inactiva.");
+        }
+
+        Producto producto = ProductoMapper.toEntity(request, categoria);
 
         return ProductoMapper.toResponse(productoRepository.save(producto));
     }
 
     @Override
     public ProductoResponse actualizarProducto(Long idProducto, ProductoRequest request) {
+
         Producto producto = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new IllegalArgumentException("El producto no existe."));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Producto no encontrado con id: " + idProducto)
+                );
+
+        if (productoRepository.existsByNombreIgnoreCaseAndIdProductoNot(request.getNombre(), idProducto)) {
+            throw new ConflictException("Ya existe otro producto con el nombre: " + request.getNombre());
+        }
 
         Categoria categoria = categoriaRepository.findById(request.getIdCategoria())
-                .orElseThrow(() -> new IllegalArgumentException("La categoría especificada no existe."));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("La categoría especificada no existe.")
+                );
 
-        producto.setNombre(request.getNombre());
-        producto.setDescripcion(request.getDescripcion());
-        producto.setPrecio(request.getPrecio());
-        producto.setStock(request.getStock());
-        producto.setImagenUrl(request.getImagenUrl());
-        producto.setCategoria(categoria);
+        if (!categoria.getActivo()) {
+            throw new BadRequestException("La categoría seleccionada está inactiva.");
+        }
 
-        Producto actualizado = productoRepository.save(producto);
-        return ProductoMapper.toResponse(actualizado);
+        ProductoMapper.updateEntity(producto, request, categoria);
+
+        return ProductoMapper.toResponse(productoRepository.save(producto));
     }
 
     @Override
     public void cambiarEstadoProducto(Long idProducto, boolean activo) {
         Producto producto = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new IllegalArgumentException("El producto no existe."));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Producto no encontrado con id: " + idProducto)
+                );
 
         producto.setActivo(activo);
         productoRepository.save(producto);
     }
 
-    // MÉTODOS CLIENTE / PÚBLICO
+    // PUBLICO / CLIENTE
 
     @Override
     @Transactional(readOnly = true)
     public List<ProductoResponse> listarProductosActivos() {
-        return productoRepository.findAll()
+        return productoRepository.findByActivoTrue()
                 .stream()
-                .filter(Producto::getActivo)
                 .map(ProductoMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ProductoResponse> listarPorCategoria(Long idCategoria) {
-        return productoRepository.findAll()
+
+        Categoria categoria = categoriaRepository.findById(idCategoria)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Categoría no encontrada.")
+                );
+
+        if (!categoria.getActivo()) {
+            throw new BadRequestException("Esta categoría está inactiva.");
+        }
+
+        return productoRepository.findByCategoria_IdCategoriaAndActivoTrue(idCategoria)
                 .stream()
-                .filter(p -> p.getActivo() && p.getCategoria().getIdCategoria().equals(idCategoria))
                 .map(ProductoMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ProductoResponse> obtenerPorId(Long idProducto) {
-        return productoRepository.findById(idProducto)
-                .filter(Producto::getActivo)
-                .map(ProductoMapper::toResponse);
+    public ProductoResponse obtenerPorId(Long idProducto) {
+        return productoRepository.findByIdAndActivoTrue(idProducto)
+                .map(ProductoMapper::toResponse)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Producto no encontrado o inactivo.")
+                );
     }
 }

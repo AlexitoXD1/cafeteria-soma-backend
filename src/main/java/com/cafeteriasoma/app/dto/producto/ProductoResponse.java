@@ -23,8 +23,10 @@ public class ProductoResponse {
     private BigDecimal precio;
     private Integer stock;
     private String imagenUrl;
+    private Long idCategoria;
     private String categoriaNombre;
     private Boolean activo;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
+
 }

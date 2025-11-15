@@ -12,6 +12,11 @@ public class CategoriaMapper {
                 .build();
     }
 
+    public static void updateEntity(Categoria categoria, CategoriaRequest dto) {
+        categoria.setNombre(dto.getNombre());
+        categoria.setDescripcion(dto.getDescripcion());
+    }
+
     public static CategoriaResponse toResponse(Categoria categoria) {
         return CategoriaResponse.builder()
                 .idCategoria(categoria.getIdCategoria())

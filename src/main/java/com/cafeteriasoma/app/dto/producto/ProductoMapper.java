@@ -5,9 +5,6 @@ import com.cafeteriasoma.app.entity.Producto;
 
 public class ProductoMapper {
 
-    /**
-     * Convierte un DTO de entrada en una entidad Producto.
-     */
     public static Producto toEntity(ProductoRequest dto, Categoria categoria) {
         return Producto.builder()
                 .nombre(dto.getNombre())
@@ -20,9 +17,15 @@ public class ProductoMapper {
                 .build();
     }
 
-    /**
-     * Convierte una entidad Producto en un DTO de salida.
-     */
+    public static void updateEntity(Producto producto, ProductoRequest dto, Categoria categoria) {
+        producto.setNombre(dto.getNombre());
+        producto.setDescripcion(dto.getDescripcion());
+        producto.setPrecio(dto.getPrecio());
+        producto.setStock(dto.getStock());
+        producto.setImagenUrl(dto.getImagenUrl());
+        producto.setCategoria(categoria);
+    }
+
     public static ProductoResponse toResponse(Producto producto) {
         return ProductoResponse.builder()
                 .idProducto(producto.getIdProducto())
@@ -31,6 +34,7 @@ public class ProductoMapper {
                 .precio(producto.getPrecio())
                 .stock(producto.getStock())
                 .imagenUrl(producto.getImagenUrl())
+                .idCategoria(producto.getCategoria().getIdCategoria())
                 .categoriaNombre(producto.getCategoria().getNombre())
                 .activo(producto.getActivo())
                 .fechaCreacion(producto.getFechaCreacion())

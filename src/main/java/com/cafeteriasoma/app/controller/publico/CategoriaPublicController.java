@@ -27,6 +27,6 @@ public class CategoriaPublicController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaResponse> obtener(@PathVariable Long id) {
-        return ResponseEntity.ok(categoriaService.obtenerPorId(id));
+        return ResponseEntity.ok(categoriaService.obtenerActivaPorId(id));
     }
 }
