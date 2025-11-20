@@ -60,7 +60,7 @@ public class VerificationCode {
     @Builder.Default
     private Boolean usado = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(
         name = "id_usuario",
         nullable = false,

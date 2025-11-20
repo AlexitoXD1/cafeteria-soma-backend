@@ -71,7 +71,7 @@ public class Usuario implements UserDetails {
     @Column(name = "contrasena", nullable = false, length = 255)
     private String contrasena; // hash (BCrypt)
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
             name = "id_rol",
             nullable = false,

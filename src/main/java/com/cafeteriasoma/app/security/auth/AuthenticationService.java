@@ -4,6 +4,10 @@ import com.cafeteriasoma.app.entity.Rol;
 import com.cafeteriasoma.app.entity.Token;
 import com.cafeteriasoma.app.entity.TokenType;
 import com.cafeteriasoma.app.entity.Usuario;
+import com.cafeteriasoma.app.exception.BadRequestException;
+import com.cafeteriasoma.app.exception.ConflictException;
+import com.cafeteriasoma.app.exception.ResourceNotFoundException;
+import com.cafeteriasoma.app.exception.UnauthorizedException;
 import com.cafeteriasoma.app.repository.RolRepository;
 import com.cafeteriasoma.app.repository.TokenRepository;
 import com.cafeteriasoma.app.repository.UsuarioRepository;
@@ -14,6 +18,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -131,4 +138,31 @@ public class AuthenticationService {
         });
         tokenRepository.saveAll(validTokens);
     }
+    /**
+     * Revoca (expira y marca como revocado) un token JWT perteneciente al usuario
+     * indicado.
+     */
+    @Transactional
+    public void logout(Usuario usuario, String jwtToken) {
+        if (jwtToken == null || jwtToken.isBlank()) {
+            throw new BadRequestException("Token inválido o ausente.");
+        }
+        Token token = tokenRepository.findByToken(jwtToken)
+                .orElseThrow(() -> new ResourceNotFoundException("Token no encontrado."));
+
+        if (token.getUsuario() == null || usuario == null ||
+                !Objects.equals(token.getUsuario().getIdUsuario(), usuario.getIdUsuario())) {
+            throw new UnauthorizedException("No autorizado para revocar este token.");
+        }
+
+        // Ahora: si el token ya está expirado o ya fue revocado, se considera inválido
+        if (token.isExpired() || token.isRevoked()) {
+            throw new ConflictException("El token ya fue invalidado o revocado previamente.");
+        }
+
+        token.setExpired(true);
+        token.setRevoked(true);
+        tokenRepository.save(token);
+    }
+
 }

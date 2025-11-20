@@ -36,7 +36,7 @@ public class Token {
     @Column(name = "expired", nullable = false)
     private boolean expired; // true = el token ya no es válido
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "id_usuario",
             nullable = false,
