@@ -74,7 +74,7 @@ public class Promocion {
     private Boolean activo = true;
 
     /** Relación bidireccional con Producto (N:N). */
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "producto_promocion",
             joinColumns = @JoinColumn(name = "id_promocion", foreignKey = @ForeignKey(name = "fk_producto_promocion_promocion")),

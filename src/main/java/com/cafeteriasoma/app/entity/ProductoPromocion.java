@@ -47,7 +47,7 @@ public class ProductoPromocion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
             name = "id_producto",
             nullable = false,
@@ -55,7 +55,7 @@ public class ProductoPromocion {
     )
     private Producto producto;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
             name = "id_promocion",
             nullable = false,
