@@ -51,7 +51,7 @@ public class Calificacion {
     @Column(name = "id_calificacion")
     private Long idCalificacion;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
             name = "id_usuario",
             nullable = false,
@@ -59,7 +59,7 @@ public class Calificacion {
     )
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
             name = "id_producto",
             nullable = false,

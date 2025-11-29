@@ -54,7 +54,7 @@ public class Reporte {
     @Column(name = "ruta_pdf", nullable = false, length = 255)
     private String rutaPdf; // Ruta del archivo generado en el sistema
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
             name = "id_usuario_admin",
             nullable = false,
