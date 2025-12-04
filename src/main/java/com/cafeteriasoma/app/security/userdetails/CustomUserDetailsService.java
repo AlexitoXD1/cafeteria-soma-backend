@@ -10,6 +10,8 @@ import com.cafeteriasoma.app.entity.Usuario;
 import com.cafeteriasoma.app.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
+import java.util.Collections;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Servicio personalizado que adapta la entidad Usuario
@@ -29,7 +31,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(usuario.getCorreo())
                 .password(usuario.getContrasena())
-                .authorities(usuario.getRol().getNombre()) // ejemplo: "ADMIN" o "CLIENTE"
+                .authorities(usuario.getRol() != null 
+                    ? Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol().getNombre()))
+                    : Collections.emptyList())
                 .build();
     }
 }
