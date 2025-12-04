@@ -31,9 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(usuario.getCorreo())
                 .password(usuario.getContrasena())
-                .authorities(usuario.getRol() != null 
-                    ? Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol().getNombre()))
-                    : Collections.emptyList())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol().getNombre())))
                 .build();
     }
 }
