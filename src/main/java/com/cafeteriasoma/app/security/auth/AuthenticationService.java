@@ -63,9 +63,9 @@ public class AuthenticationService {
         throw new IllegalArgumentException("El nombre solo debe contener letras y espacios.");
         }
         // Validación de la contraseña
-        if (!request.getContrasena().matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&.])[A-Za-z\\d@$!%*?&.]{8,}$")) {
+        if (request.getContrasena().length() < 6) {
         throw new IllegalArgumentException(
-                "La contraseña debe tener al menos 8 caracteres, una mayuscula, una minuscula, un numero y un simbolo."
+                "La contraseña debe tener al menos 6 caracteres."
         );
         }
 
@@ -116,6 +116,7 @@ public class AuthenticationService {
         return AuthResponse.builder()
                 .token(jwtToken)
                 .message("Autenticación exitosa")
+                .rol(usuario.getRol().getNombre())
                 .build();
     }
 
