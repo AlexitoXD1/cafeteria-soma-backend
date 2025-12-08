@@ -63,9 +63,9 @@ public class AuthenticationService {
         throw new IllegalArgumentException("El nombre solo debe contener letras y espacios.");
         }
         // Validación de la contraseña
-        if (request.getContrasena().length() < 6) {
+        if (!request.getContrasena().matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&.])[A-Za-z\\d@$!%*?&.]{8,}$")) {
         throw new IllegalArgumentException(
-                "La contraseña debe tener al menos 6 caracteres."
+                "La contraseña debe tener al menos 8 caracteres, una mayuscula, una minuscula, un numero y un simbolo."
         );
         }
 
