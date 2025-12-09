@@ -1,10 +1,9 @@
-package com.cafeteriasoma.app.controller.client;
+package com.cafeteriasoma.app.controller.publico;
 
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -26,11 +25,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Controlador público del carrito de compras.
+ * Soporta usuarios autenticados y anónimos mediante un identificador de sesión.
+ */
 @RestController
-@RequestMapping("/api/client/carrito")
+@RequestMapping("/api/public/carrito")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('CLIENTE')")
-public class CarritoClientController {
+public class CarritoPublicController {
 
     private final CarritoService carritoService;
 

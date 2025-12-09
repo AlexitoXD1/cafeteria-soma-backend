@@ -29,4 +29,13 @@ public class ProductoResponse {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
 
+    /** Precio final después de aplicar la promoción (si existe). */
+    private BigDecimal precioConDescuento;
+
+    /** Indica si el producto está bajo alguna promoción aplicada. */
+    private Boolean tienePromocion;
+
+    /** Porcentaje de descuento aplicado (ej. 15 para 15%). */
+    private BigDecimal porcentajeDescuento;
+
 }

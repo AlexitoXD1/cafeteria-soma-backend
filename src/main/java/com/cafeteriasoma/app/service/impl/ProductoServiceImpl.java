@@ -98,6 +98,15 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ProductoResponse> listarTodosProductos() {
+        return productoRepository.findAll()
+                .stream()
+                .map(ProductoMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ProductoResponse> listarPorCategoria(Long idCategoria) {
 
         Categoria categoria = categoriaRepository.findById(idCategoria)
@@ -123,5 +132,14 @@ public class ProductoServiceImpl implements ProductoService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Producto no encontrado o inactivo.")
                 );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductoResponse> listarProductosInactivos() {
+        return productoRepository.findByActivoFalse()
+                .stream()
+                .map(ProductoMapper::toResponse)
+                .toList();
     }
 }
