@@ -15,6 +15,10 @@ public interface ProductoService {
 
     List<ProductoResponse> listarProductosActivos();
 
+    List<ProductoResponse> listarProductosInactivos();
+
+    List<ProductoResponse> listarTodosProductos();
+
     List<ProductoResponse> listarPorCategoria(Long idCategoria);
 
     ProductoResponse obtenerPorId(Long idProducto);

@@ -1,13 +1,15 @@
 package com.cafeteriasoma.app.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalDateTime;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -91,4 +93,15 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
     }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<ApiError> handleDataIntegrityViolation(
+                DataIntegrityViolationException ex,
+                HttpServletRequest request
+        ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "No se puede eliminar el registro porque tiene datos asociados (ej. ventas). Intente desactivarlo.",
+                request.getRequestURI()
+        );
+        }
 }

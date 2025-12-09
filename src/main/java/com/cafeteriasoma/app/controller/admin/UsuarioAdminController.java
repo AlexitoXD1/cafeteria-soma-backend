@@ -20,6 +20,7 @@ import com.cafeteriasoma.app.service.interfaces.UsuarioService;
 
 import lombok.RequiredArgsConstructor;
 
+// Admin controller for managing users
 @RestController
 @RequestMapping("/api/admin/usuarios")
 @RequiredArgsConstructor
@@ -28,27 +29,32 @@ public class UsuarioAdminController {
 
     private final UsuarioService usuarioService;
 
+    // Create a new user
     @PostMapping
     public ResponseEntity<UsuarioResponse> crear(@RequestBody UsuarioRequest request) {
         return ResponseEntity.status(201).body(usuarioService.crearUsuario(request));
     }
 
+    // List all users
     @GetMapping
     public ResponseEntity<List<UsuarioResponse>> listar() {
         return ResponseEntity.ok(usuarioService.listarUsuarios());
     }
 
+    // Get user by ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponse> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.obtenerPorId(id));
     }
 
+    // Update user details
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponse> actualizar(@PathVariable Long id,
                                                      @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.actualizarUsuario(id, request));
     }
 
+    // Change user active/inactive status
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam Boolean activo) {
         usuarioService.cambiarEstado(id, activo);

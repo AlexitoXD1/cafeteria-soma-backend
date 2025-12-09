@@ -20,6 +20,7 @@ import com.cafeteriasoma.app.service.interfaces.RolService;
 
 import lombok.RequiredArgsConstructor;
 
+// Admin controller for managing roles
 @RestController
 @RequestMapping("/api/admin/roles")
 @RequiredArgsConstructor
@@ -28,26 +29,31 @@ public class RolAdminController {
 
     private final RolService rolService;
 
+    // Create a new role
     @PostMapping
     public ResponseEntity<RolResponse> crear(@RequestBody RolRequest request) {
         return ResponseEntity.ok(rolService.crearRol(request));
     }
 
+    // List all roles
     @GetMapping
     public ResponseEntity<List<RolResponse>> listar() {
         return ResponseEntity.ok(rolService.listarRoles());
     }
 
+    // Get role by ID
     @GetMapping("/{id}")
     public ResponseEntity<RolResponse> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(rolService.obtenerPorId(id));
     }
 
+    // Update role details
     @PutMapping("/{id}")
     public ResponseEntity<RolResponse> actualizar(@PathVariable Long id, @RequestBody RolRequest request) {
         return ResponseEntity.ok(rolService.actualizarRol(id, request));
     }
 
+    // Change role active/inactive status
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam Boolean activo) {
         rolService.cambiarEstado(id, activo);

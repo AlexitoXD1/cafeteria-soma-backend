@@ -13,6 +13,7 @@ import com.cafeteriasoma.app.service.interfaces.VentaService;
 
 import lombok.RequiredArgsConstructor;
 
+// Admin controller for managing sales
 @RestController
 @RequestMapping("/api/admin/ventas")
 @RequiredArgsConstructor
