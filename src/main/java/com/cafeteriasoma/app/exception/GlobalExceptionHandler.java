@@ -94,14 +94,26 @@ public class GlobalExceptionHandler {
         );
     }
     @ExceptionHandler(DataIntegrityViolationException.class)
-        public ResponseEntity<ApiError> handleDataIntegrityViolation(
-                DataIntegrityViolationException ex,
-                HttpServletRequest request
-        ) {
-        return buildResponse(
-                HttpStatus.CONFLICT,
-                "No se puede eliminar el registro porque tiene datos asociados (ej. ventas). Intente desactivarlo.",
-                request.getRequestURI()
-        );
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        String message = "Error de integridad de datos.";
+        
+        // Detectar el tipo específico de error
+        String errorMsg = ex.getMessage().toLowerCase();
+        
+        if (errorMsg.contains("cannot be null")) {
+            message = "Error: Campo requerido no puede ser nulo. Verifique la configuración de la base de datos.";
+        } else if (errorMsg.contains("duplicate") || errorMsg.contains("unique")) {
+            message = "El registro ya existe o viola una restricción única.";
+        } else if (errorMsg.contains("foreign key")) {
+            message = "No se puede eliminar el registro porque tiene datos asociados. Intente desactivarlo.";
         }
+        
+        // Log para debugging
+        ex.printStackTrace();
+        
+        return buildResponse(HttpStatus.CONFLICT, message, request.getRequestURI());
+    }
 }

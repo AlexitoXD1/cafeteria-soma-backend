@@ -11,6 +11,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -24,24 +25,29 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Representa los productos añadidos al carrito por un usuario antes de concretar la compra.
- * Ideal para almacenar el estado temporal del proceso de compra.
+ * Carrito temporal que soporta usuarios autenticados y anónimos.
+ * - Usuario autenticado: id_usuario != null, session_id = null
+ * - Usuario anónimo: session_id != null, id_usuario = null
  */
 @Entity
 @Table(
         name = "carrito_temporal",
+        indexes = {
+                @Index(name = "idx_carrito_session", columnList = "session_id"),
+                @Index(name = "idx_carrito_usuario", columnList = "id_usuario")
+        },
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_carrito_usuario_producto",
                         columnNames = {"id_usuario", "id_producto"}
+                ),
+                @UniqueConstraint(
+                        name = "uk_carrito_session_producto",
+                        columnNames = {"session_id", "id_producto"}
                 )
         }
 )
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"usuario", "producto"})
 @EqualsAndHashCode(of = "idCarrito")
 public class CarritoTemporal {
@@ -51,13 +57,17 @@ public class CarritoTemporal {
     @Column(name = "id_carrito")
     private Long idCarrito;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    // DEBE SER NULLABLE (sin nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "id_usuario",
-            nullable = false,
             foreignKey = @ForeignKey(name = "fk_carrito_usuario")
     )
     private Usuario usuario;
+
+    // DEBE SER NULLABLE
+    @Column(name = "session_id", length = 100)
+    private String sessionId;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(
