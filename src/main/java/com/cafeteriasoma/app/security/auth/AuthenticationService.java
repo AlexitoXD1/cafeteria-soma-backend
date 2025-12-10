@@ -116,6 +116,7 @@ public class AuthenticationService {
         return AuthResponse.builder()
                 .token(jwtToken)
                 .message("Autenticación exitosa")
+                .rol(usuario.getRol().getNombre())
                 .build();
     }
 

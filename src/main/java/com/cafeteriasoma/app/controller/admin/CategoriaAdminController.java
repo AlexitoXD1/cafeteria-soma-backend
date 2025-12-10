@@ -22,6 +22,7 @@ import com.cafeteriasoma.app.service.interfaces.CategoriaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+// Admin controller for managing categories
 @RestController
 @RequestMapping("/api/admin/categorias")
 @RequiredArgsConstructor
@@ -30,22 +31,26 @@ public class CategoriaAdminController {
 
     private final CategoriaService categoriaService;
 
+    // Create a new category
     @PostMapping
     public ResponseEntity<CategoriaResponse> crear(@Valid @RequestBody CategoriaRequest request) {
         CategoriaResponse response = categoriaService.crearCategoria(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // List all categories (active and inactive)
     @GetMapping
     public ResponseEntity<List<CategoriaResponse>> listar() {
         return ResponseEntity.ok(categoriaService.listarCategorias(false));
     }
 
+    // Get category by ID
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaResponse> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.obtenerPorId(id));
     }
 
+    // Update category details
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaResponse> actualizar(
             @PathVariable Long id,
@@ -54,6 +59,7 @@ public class CategoriaAdminController {
         return ResponseEntity.ok(categoriaService.actualizarCategoria(id, request));
     }
 
+    // Change category active/inactive status
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam Boolean activo) {
         categoriaService.cambiarEstado(id, activo);

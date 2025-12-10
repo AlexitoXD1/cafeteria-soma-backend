@@ -16,4 +16,6 @@ public interface CarritoService {
     void eliminarItem(String correo, Long idProducto);
 
     void vaciarCarrito(String correo);
+
+    void migrarCarritoAnonimo(String sessionId, String correo);
 }

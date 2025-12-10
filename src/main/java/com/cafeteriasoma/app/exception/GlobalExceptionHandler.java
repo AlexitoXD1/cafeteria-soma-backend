@@ -1,13 +1,15 @@
 package com.cafeteriasoma.app.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalDateTime;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -90,5 +92,28 @@ public class GlobalExceptionHandler {
                 "Error interno: " + ex.getMessage(),
                 request.getRequestURI()
         );
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        String message = "Error de integridad de datos.";
+        
+        // Detectar el tipo específico de error
+        String errorMsg = ex.getMessage().toLowerCase();
+        
+        if (errorMsg.contains("cannot be null")) {
+            message = "Error: Campo requerido no puede ser nulo. Verifique la configuración de la base de datos.";
+        } else if (errorMsg.contains("duplicate") || errorMsg.contains("unique")) {
+            message = "El registro ya existe o viola una restricción única.";
+        } else if (errorMsg.contains("foreign key")) {
+            message = "No se puede eliminar el registro porque tiene datos asociados. Intente desactivarlo.";
+        }
+        
+        // Log para debugging
+        ex.printStackTrace();
+        
+        return buildResponse(HttpStatus.CONFLICT, message, request.getRequestURI());
     }
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Representa la respuesta del login o registro,
- * incluyendo el token JWT y un mensaje.
+ * incluyendo el token JWT, un mensaje y el rol del usuario.
  */
 @Data
 @Builder
@@ -16,4 +16,5 @@ import lombok.NoArgsConstructor;
 public class AuthResponse {
     private String token;
     private String message;
+    private String rol;
 }

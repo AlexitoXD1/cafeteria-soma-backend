@@ -31,34 +31,51 @@ public class CarritoServiceImpl implements CarritoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CarritoItemResponse> obtenerCarrito(String correo) {
-        Usuario usuario = obtenerUsuario(correo);
-
-        return carritoRepository.findByUsuario(usuario).stream()
-                .map(CarritoMapper::toResponse)
-                .toList();
+    public List<CarritoItemResponse> obtenerCarrito(String identificador) {
+        if (esCorreo(identificador)) {
+            Usuario usuario = obtenerUsuario(identificador);
+            return carritoRepository.findByUsuario(usuario).stream()
+                    .map(CarritoMapper::toResponse)
+                    .toList();
+        } else {
+            return carritoRepository.findBySessionId(identificador).stream()
+                    .map(CarritoMapper::toResponse)
+                    .toList();
+        }
     }
 
     @Override
-    public CarritoItemResponse agregarAlCarrito(String correo, CarritoItemRequest request) {
+    public CarritoItemResponse agregarAlCarrito(String identificador, CarritoItemRequest request) {
         if (request.getCantidad() == null || request.getCantidad() < 1) {
             throw new BadRequestException("La cantidad debe ser al menos 1");
         }
 
-        Usuario usuario = obtenerUsuario(correo);
         Producto producto = obtenerProductoActivo(request.getIdProducto());
 
         if (producto.getStock() < request.getCantidad()) {
             throw new BadRequestException("No hay stock suficiente para este producto");
         }
 
-        CarritoTemporal carrito = carritoRepository.findByUsuarioAndProducto(usuario, producto)
-                .orElseGet(() -> CarritoTemporal.builder()
-                        .usuario(usuario)
-                        .producto(producto)
-                        .cantidad(0)
-                        .build()
-                );
+        CarritoTemporal carrito;
+
+        if (esCorreo(identificador)) {
+            Usuario usuario = obtenerUsuario(identificador);
+            carrito = carritoRepository.findByUsuarioAndProducto(usuario, producto)
+                    .orElseGet(() -> CarritoTemporal.builder()
+                            .usuario(usuario)
+                            .producto(producto)
+                            .cantidad(0)
+                            .build()
+                    );
+        } else {
+            carrito = carritoRepository.findBySessionIdAndProducto(identificador, producto)
+                    .orElseGet(() -> CarritoTemporal.builder()
+                            .sessionId(identificador)
+                            .producto(producto)
+                            .cantidad(0)
+                            .build()
+                    );
+        }
 
         int nuevaCantidad = carrito.getCantidad() + request.getCantidad();
 
@@ -73,16 +90,23 @@ public class CarritoServiceImpl implements CarritoService {
     }
 
     @Override
-    public CarritoItemResponse actualizarCantidad(String correo, CarritoItemRequest request) {
+    public CarritoItemResponse actualizarCantidad(String identificador, CarritoItemRequest request) {
         if (request.getCantidad() == null || request.getCantidad() < 1) {
             throw new BadRequestException("La cantidad debe ser al menos 1");
         }
 
-        Usuario usuario = obtenerUsuario(correo);
         Producto producto = obtenerProductoActivo(request.getIdProducto());
 
-        CarritoTemporal carrito = carritoRepository.findByUsuarioAndProducto(usuario, producto)
-                .orElseThrow(() -> new ResourceNotFoundException("El producto no está en el carrito"));
+        CarritoTemporal carrito;
+
+        if (esCorreo(identificador)) {
+            Usuario usuario = obtenerUsuario(identificador);
+            carrito = carritoRepository.findByUsuarioAndProducto(usuario, producto)
+                    .orElseThrow(() -> new ResourceNotFoundException("El producto no está en el carrito"));
+        } else {
+            carrito = carritoRepository.findBySessionIdAndProducto(identificador, producto)
+                    .orElseThrow(() -> new ResourceNotFoundException("El producto no está en el carrito"));
+        }
 
         if (request.getCantidad() > producto.getStock()) {
             throw new BadRequestException("La cantidad solicitada supera el stock disponible");
@@ -95,23 +119,44 @@ public class CarritoServiceImpl implements CarritoService {
     }
 
     @Override
-    public void eliminarItem(String correo, Long idProducto) {
-        Usuario usuario = obtenerUsuario(correo);
+    public void eliminarItem(String identificador, Long idProducto) {
         Producto producto = obtenerProductoActivo(idProducto);
 
-        CarritoTemporal carrito = carritoRepository.findByUsuarioAndProducto(usuario, producto)
-                .orElseThrow(() -> new ResourceNotFoundException("El producto no está en el carrito"));
+        CarritoTemporal carrito;
+
+        if (esCorreo(identificador)) {
+            Usuario usuario = obtenerUsuario(identificador);
+            carrito = carritoRepository.findByUsuarioAndProducto(usuario, producto)
+                    .orElseThrow(() -> new ResourceNotFoundException("El producto no está en el carrito"));
+        } else {
+            carrito = carritoRepository.findBySessionIdAndProducto(identificador, producto)
+                    .orElseThrow(() -> new ResourceNotFoundException("El producto no está en el carrito"));
+        }
 
         carritoRepository.delete(carrito);
     }
 
     @Override
-    public void vaciarCarrito(String correo) {
+    public void vaciarCarrito(String identificador) {
+        if (esCorreo(identificador)) {
+            Usuario usuario = obtenerUsuario(identificador);
+            carritoRepository.deleteByUsuario(usuario);
+        } else {
+            carritoRepository.deleteBySessionId(identificador);
+        }
+    }
+
+    @Override
+    public void migrarCarritoAnonimo(String sessionId, String correo) {
         Usuario usuario = obtenerUsuario(correo);
-        carritoRepository.deleteByUsuario(usuario);
+        carritoRepository.migrarCarritoAnonimo(sessionId, usuario);
     }
 
     // ====================== helpers internos ======================
+
+    private boolean esCorreo(String identificador) {
+        return identificador != null && identificador.contains("@");
+    }
 
     private Usuario obtenerUsuario(String correo) {
         return usuarioRepository.findByCorreo(correo)
